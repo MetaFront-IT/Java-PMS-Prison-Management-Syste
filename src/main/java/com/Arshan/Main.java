@@ -1,6 +1,6 @@
 package com.Arshan;
 
-import com.Arshan.models.entity.Cell;
+import com.Arshan.models.dao.implement.PrisonerImpl;
 import com.Arshan.models.entity.Prisoner;
 import com.Arshan.models.entity.enums.Gender;
 import com.Arshan.models.entity.enums.PrisonerStatus;
@@ -13,5 +13,8 @@ import java.util.*;
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     static void main() {
+        PrisonerImpl prisoner = new PrisonerImpl();
+
+
     }
 }

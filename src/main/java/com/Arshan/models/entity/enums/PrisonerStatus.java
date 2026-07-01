@@ -10,7 +10,7 @@ public enum PrisonerStatus {
         this.status = status;
     }
 
-    public String getStatus() {
+    public String getString() {
         return status;
     }
 }

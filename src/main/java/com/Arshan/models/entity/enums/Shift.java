@@ -10,7 +10,7 @@ public enum Shift {
         this.shift = shift;
     }
 
-    public String getShift() {
+    public String getString() {
         return shift;
     }
 }
