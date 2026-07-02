@@ -1,7 +1,19 @@
 package com.Arshan.models.dao;
 
 import com.Arshan.models.entity.Cell;
+import com.Arshan.models.entity.Prisoner;
 
-public interface CellDao extends GeneralDao<Cell, Integer>{
-    Integer getRemaining
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.List;
+
+public interface CellDao{
+    void create(Cell entity);
+    void Update(Cell entity , Integer id);
+
+    Integer getRemaining(Integer id);
+    HashSet<Prisoner> getPrisoners(Integer id);
+    List<Cell> getEmptyCell();
+    Cell map(ResultSet rs) throws SQLException;
 }

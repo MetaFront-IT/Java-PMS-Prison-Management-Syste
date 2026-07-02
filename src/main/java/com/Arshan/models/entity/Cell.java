@@ -1,22 +1,26 @@
 package com.Arshan.models.entity;
 
-import java.util.List;
+import java.util.HashSet;
 
 public class Cell {
     private int id;
     private int cellNumber;
     private int capacity;
-    private List<Prisoner> CurrentPrisoners;
+    private HashSet<Prisoner> CurrentPrisoners;
     private int blockId;
 
-    public Cell(int cellNumber, int capacity, List<Prisoner> currentPrisoners, int blockId) {
+    public Cell(int cellNumber, int capacity, int blockId) {
         this.cellNumber = cellNumber;
         this.capacity = capacity;
-        CurrentPrisoners = currentPrisoners;
         this.blockId = blockId;
     }
 
-    public Cell(int id, int cellNumber, int capacity, List<Prisoner> currentPrisoners, int blockId) {
+    public Cell(int cellNumber, int capacity, HashSet<Prisoner> currentPrisoners, int blockId) {
+        this.CurrentPrisoners = currentPrisoners;
+        this(cellNumber, capacity, blockId);
+    }
+
+    public Cell(int id, int cellNumber, int capacity, HashSet<Prisoner> currentPrisoners, int blockId) {
         this.id = id;
         this(cellNumber, capacity, currentPrisoners, blockId);
     }
@@ -37,11 +41,11 @@ public class Cell {
         this.capacity = capacity;
     }
 
-    public List<Prisoner> getCurrentPrisoners() {
+    public HashSet<Prisoner> getCurrentPrisoners() {
         return CurrentPrisoners;
     }
 
-    public void setCurrentPrisoners(List<Prisoner> currentPrisoners) {
+    public void setCurrentPrisoners(HashSet<Prisoner> currentPrisoners) {
         CurrentPrisoners = currentPrisoners;
     }
 
@@ -51,6 +55,14 @@ public class Cell {
 
     public void setBlockId(int blockId) {
         this.blockId = blockId;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     @Override

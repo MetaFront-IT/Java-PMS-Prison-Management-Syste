@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class PrisonerImpl implements PrisonerDao {
+public class PrisonerDaoImpl implements PrisonerDao {
     @Override
     public void create(Prisoner entity) {
         String sql = "INSERT INTO Prisoner(first_name, last_name, national_code, birth_date, gender, status, sentence_id, cell_id) VALUES(?,?,?,?,?,?,?,?)";
@@ -149,8 +149,6 @@ public class PrisonerImpl implements PrisonerDao {
         }
         return null;
     }
-
-    @Override
     public Prisoner map(ResultSet rs) throws SQLException{
         return new Prisoner(
                 rs.getInt("id"),
