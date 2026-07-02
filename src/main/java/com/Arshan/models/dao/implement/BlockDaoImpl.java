@@ -18,7 +18,7 @@ public class BlockDaoImpl implements BlockDao {
         try (Connection conn = DataBaseManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, entity.getName());
-            ps.execute()
+            ps.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage());
         }
