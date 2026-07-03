@@ -1,24 +1,29 @@
 package com.Arshan.models.entity;
 
+import com.Arshan.models.entity.enums.VisitStatus;
+
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 public class Visit {
     private int id;
     private int prisonerId;
     private int visitorId;
     private LocalDate visitDate;
-    private LocalDate visitTime;
+    private LocalTime visitTime;
+    private VisitStatus status;
 
-    public Visit(int prisonerId, int visitorId, LocalDate visitDate, LocalDate visitTime) {
+    public Visit(int prisonerId, int visitorId, LocalDate visitDate, LocalTime visitTime, VisitStatus status) {
         this.prisonerId = prisonerId;
         this.visitorId = visitorId;
         this.visitDate = visitDate;
         this.visitTime = visitTime;
+        this.status = status;
     }
 
-    public Visit(int id, int prisonerId, int visitorId, LocalDate visitDate, LocalDate visitTime) {
+    public Visit(int id, int prisonerId, int visitorId, LocalDate visitDate, LocalTime visitTime, VisitStatus status) {
         this.id = id;
-        this(prisonerId, visitorId, visitDate, visitTime);
+        this(prisonerId, visitorId, visitDate, visitTime, status);
     }
 
     public int getId() {
@@ -53,11 +58,19 @@ public class Visit {
         this.visitDate = visitDate;
     }
 
-    public LocalDate getVisitTime() {
+    public LocalTime getVisitTime() {
         return visitTime;
     }
 
-    public void setVisitTime(LocalDate visitTime) {
+    public void setVisitTime(LocalTime visitTime) {
         this.visitTime = visitTime;
+    }
+
+    public VisitStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(VisitStatus status) {
+        this.status = status;
     }
 }

@@ -1,5 +1,6 @@
 package com.Arshan.models.dao.implement;
 
+import com.Arshan.models.dao.CellDao;
 import com.Arshan.models.dao.PrisonerDao;
 import com.Arshan.models.database.DataBaseManager;
 import com.Arshan.models.entity.Prisoner;
@@ -125,30 +126,37 @@ public class PrisonerDaoImpl implements PrisonerDao {
     public Transfer transfer(int prisonerId, int fromCell, int toCell, int guardId, LocalDate transferDate, String description) {
         String sql = "INSERT into  transfer(prisoner_id, from_cell, to_cell, guard_id, transfer_date, description) values (?,?,?,?,?,?)";
         String innerSql = "UPDATE Prisoner SET cell_id = ? where id = ?";
-        try (Connection conn = DataBaseManager.getInstance().getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql);
-        PreparedStatement innerPS = conn.prepareStatement(innerSql)) {
+        try (Connection conn = DataBaseManager.getInstance().getConnection()) {
             conn.setAutoCommit(false);
+            CellDao cellDao = new CellDaoImpl();
+            if (cellDao.getRemaining(toCell) > 0) {
+                try (PreparedStatement ps = conn.prepareStatement(sql);
+                     PreparedStatement innerPS = conn.prepareStatement(innerSql)) {
+                    innerPS.setInt(1, toCell);
+                    innerPS.setInt(2, prisonerId);
 
-            innerPS.setInt(1, toCell);
-            innerPS.setInt(2, prisonerId);
-
-            ps.setInt(1, prisonerId);
-            ps.setInt(2, fromCell);
-            ps.setInt(3, toCell);
-            ps.setInt(4, guardId);
-            ps.setDate(5, Date.valueOf(transferDate));
-            ps.setString(6, description);
-            ps.executeUpdate();
-            innerPS.executeUpdate();
-
+                    ps.setInt(1, prisonerId);
+                    ps.setInt(2, fromCell);
+                    ps.setInt(3, toCell);
+                    ps.setInt(4, guardId);
+                    ps.setDate(5, Date.valueOf(transferDate));
+                    ps.setString(6, description);
+                    ps.executeUpdate();
+                    innerPS.executeUpdate();
+                } catch (SQLException e) {
+                    conn.rollback();
+                    throw new RuntimeException(e.getMessage());
+                }
+            } else {
+                throw new RuntimeException("Cell Is full");
+            }
             conn.commit();
             return new Transfer(prisonerId, fromCell, toCell, guardId, transferDate, description);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException | RuntimeException e) {
+            throw new RuntimeException(e.getMessage());
         }
-        return null;
     }
+
     public Prisoner map(ResultSet rs) throws SQLException{
         return new Prisoner(
                 rs.getInt("id"),

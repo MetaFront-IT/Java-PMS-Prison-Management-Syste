@@ -33,7 +33,7 @@ public class CellDaoImpl implements CellDao {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, entity.getCapacity());
             ps.setInt(2, entity.getBlockId());
-            ps.setInt(3, entity.getId());
+            ps.setInt(3, integer);
             ps.execute();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -78,7 +78,7 @@ public class CellDaoImpl implements CellDao {
 
     @Override
     public List<Cell> getEmptyCell() {
-        String sql = "SELECT * where (c.capacity - COUNT(p.id) > 0) AS remaining FROM Cell c LEFT JOIN Prisoner p ON p.cell_id = c.id GROUP BY c.id, c.capacity";
+        String sql = "SELECT C.* FROM Cell c LEFT JOIN Prisoner p ON  c.id = p.cell_id GROUP BY c.id, p.id HAVING COUNT(p.id) < c.capacity";
         List<Cell> emptyCells = new ArrayList<>();
         try (Connection conn = DataBaseManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -91,6 +91,7 @@ public class CellDaoImpl implements CellDao {
         }
         return emptyCells;
     }
+
     public Cell map(ResultSet rs) throws SQLException{
         return new Cell(
                 rs.getInt("id"),
@@ -99,5 +100,37 @@ public class CellDaoImpl implements CellDao {
                 getPrisoners(rs.getInt("id")),
                 rs.getInt("block_id")
         );
+    }
+
+    @Override
+    public int getPrisonerCount(int cellId) {
+        String sql = "SELECT COUNT(id) FROM prisoners where cell_id = ?";
+        try (Connection conn = DataBaseManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, cellId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        return 0;
+    }
+
+    @Override
+    public List<Cell> getFullCell() {
+        String sql = "SELECT c.*, count(p.id) FROM Cell c INNER JOIN Prisoner p ON c.id = p.cell_id group by c.id HAVING count(p.id) >= c.capacity";
+        List<Cell> fullCells = new ArrayList<>();
+        try (Connection conn = DataBaseManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                fullCells.add(map(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        return fullCells;
     }
 }

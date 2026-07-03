@@ -15,5 +15,8 @@ public interface CellDao{
     Integer getRemaining(Integer id);
     HashSet<Prisoner> getPrisoners(Integer id);
     List<Cell> getEmptyCell();
+    List<Cell> getFullCell();
     Cell map(ResultSet rs) throws SQLException;
+    int getPrisonerCount(int cellId);
+
 }

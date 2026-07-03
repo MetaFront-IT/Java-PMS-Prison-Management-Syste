@@ -11,4 +11,5 @@ public interface BlockDao {
     void delete(int id);
 
     List<Cell> getCells(int id);
+    int getPrisonersCount(int id);
 }

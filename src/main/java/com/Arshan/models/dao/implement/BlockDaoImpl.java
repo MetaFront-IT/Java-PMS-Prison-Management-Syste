@@ -4,6 +4,7 @@ import com.Arshan.models.dao.BlockDao;
 import com.Arshan.models.database.DataBaseManager;
 import com.Arshan.models.entity.Block;
 import com.Arshan.models.entity.Cell;
+import com.Arshan.models.exceptions.NotFound;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,7 +27,7 @@ public class BlockDaoImpl implements BlockDao {
 
     @Override
     public void delete(int id) {
-        String sql = "DELETE from block() where id = ?";
+        String sql = "DELETE from block where id = ?";
         try (Connection conn = DataBaseManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -49,11 +50,29 @@ public class BlockDaoImpl implements BlockDao {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                cellDao.map(rs);
+                cells.add(cellDao.map(rs));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage());
         }
         return cells;
+    }
+
+    @Override
+    public int getPrisonersCount(int id) {
+        String sql = "SELECT COUNT(p.id) FROM prisoner p INNER JOIN Cell c ON p.cell_id = c.id LEFT JOIN Block b ON c.block_id = b.id where b.id = ?";
+        try (Connection conn = DataBaseManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count");
+            } else {
+                throw new NotFound();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

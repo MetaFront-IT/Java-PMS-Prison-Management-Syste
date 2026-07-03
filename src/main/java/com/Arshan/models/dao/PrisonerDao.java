@@ -5,7 +5,6 @@ import com.Arshan.models.entity.Transfer;
 
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.List;
 
 public interface PrisonerDao extends GeneralDao<Prisoner, Integer> {
     HashMap<Integer ,String> search(String string);
