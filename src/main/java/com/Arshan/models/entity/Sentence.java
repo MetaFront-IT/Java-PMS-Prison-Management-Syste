@@ -7,21 +7,19 @@ import java.time.LocalDate;
 public class Sentence {
     private int id;
     private int crimeId;
-    private int prisonerId;
     private LocalDate startDate;
     private LocalDate endDate;
     private SentenceStatus status;
 
-    public Sentence(int crimeId, int prisonerId, LocalDate startDate, LocalDate endDate) {
+    public Sentence(int crimeId, LocalDate startDate, LocalDate endDate, SentenceStatus status) {
         this.crimeId = crimeId;
-        this.prisonerId = prisonerId;
         this.startDate = startDate;
         this.endDate = endDate;
-    }
-    public Sentence(int id, int crimeId, int prisonerId, LocalDate startDate, LocalDate endDate, SentenceStatus status) {
-        this.id = id;
-        this(crimeId, prisonerId, startDate, endDate);
         this.status = status;
+    }
+    public Sentence(int id, int crimeId, LocalDate startDate, LocalDate endDate, SentenceStatus status) {
+        this.id = id;
+        this(crimeId, startDate, endDate, status);
     }
 
     public int getId() {
@@ -38,14 +36,6 @@ public class Sentence {
 
     public void setCrimeId(int crimeId) {
         this.crimeId = crimeId;
-    }
-
-    public int getPrisonerId() {
-        return prisonerId;
-    }
-
-    public void setPrisonerId(int prisonerId) {
-        this.prisonerId = prisonerId;
     }
 
     public LocalDate getStartDate() {
@@ -77,7 +67,6 @@ public class Sentence {
         return "Sentence{" +
                 "id=" + id +
                 ", crimeid=" + crimeId +
-                ", prisonerid=" + prisonerId +
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +
                 ", status=" + status +

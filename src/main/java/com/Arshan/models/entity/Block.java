@@ -28,4 +28,12 @@ public class Block {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return "Block{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

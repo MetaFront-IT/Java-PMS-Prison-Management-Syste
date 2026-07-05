@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DataBaseManager {
-    private static final String URL = "jdbc:postgresql://localhost:5432/postgres";
+    private static final String URL = "jdbc:postgresql://localhost:5432/test";
     private static final String USERNAME = "postgres";
     private static final String PASSWORD = "1234";
 
@@ -30,10 +30,14 @@ public class DataBaseManager {
     public Connection getConnection() {
         try {
             if (connection == null || connection.isClosed()) {
-                instance = new DataBaseManager();
+                connection = DriverManager.getConnection(
+                        URL,
+                        USERNAME,
+                        PASSWORD
+                );
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
         return connection;
     }

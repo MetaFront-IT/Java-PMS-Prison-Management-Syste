@@ -3,7 +3,9 @@ package com.Arshan.models.dao.implement;
 import com.Arshan.models.dao.CellDao;
 import com.Arshan.models.dao.PrisonerDao;
 import com.Arshan.models.database.DataBaseManager;
+import com.Arshan.models.entity.Crime;
 import com.Arshan.models.entity.Prisoner;
+import com.Arshan.models.entity.Sentence;
 import com.Arshan.models.entity.Transfer;
 import com.Arshan.models.entity.enums.Gender;
 import com.Arshan.models.entity.enums.PrisonerStatus;
@@ -18,19 +20,23 @@ import java.util.List;
 public class PrisonerDaoImpl implements PrisonerDao {
     @Override
     public void create(Prisoner entity) {
-        String sql = "INSERT INTO Prisoner(first_name, last_name, national_code, birth_date, gender, status, sentence_id, cell_id) VALUES(?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO Prisoner(first_name, last_name, national_code, birth_date, gender, status, cell_id, sentence_id) VALUES(?,?,?,?,?,?,?,?)";
         try(Connection conn = DataBaseManager.getInstance().getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, entity.getFirstName());
-            ps.setString(2, entity.getLastName());
-            ps.setString(3, entity.getNationalCode());
+            if (new CellDaoImpl().getRemaining(entity.getCellID()) > 0) {
+                ps.setString(1, entity.getFirstName());
+                ps.setString(2, entity.getLastName());
+                ps.setString(3, entity.getNationalCode());
+                ps.setDate(4, Date.valueOf(entity.getBirthDate()));
+                ps.setString(5, entity.getGender().getString());
+                ps.setString(6, entity.getStatus().getString());
+                ps.setInt(7, entity.getCellID());
+                ps.setInt(8,entity.getSentenceId());
 
-            ps.setDate(4, Date.valueOf(entity.getBirthDate()));
-            ps.setString(5, entity.getGender().getString());
-            ps.setString(6, entity.getStatus().getString());
-            ps.setInt(7, entity.getSentenceId());
-            ps.setInt(8, entity.getCellID());
-            ps.execute();
+                ps.execute();
+            } else {
+                System.out.println("Cell is Full");
+            }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -38,22 +44,21 @@ public class PrisonerDaoImpl implements PrisonerDao {
 
     @Override
     public void Update(Prisoner entity, Integer id) {
-        String sql = "UPDATE prisoner SET first_name = ?, last_name = ?, national_code = ?, birth_date = ?, gender = ? ,status = ?, sentence_id = ?, cell_id = ? WHERE id = ?";
+        String sql = "UPDATE prisoner SET first_name = ?, last_name = ?, national_code = ?, birth_date = ?, gender = ? ,status = ?, sentence_id = ? WHERE id = ?";
         try(Connection conn = DataBaseManager.getInstance().getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, entity.getFirstName());
             ps.setString(2, entity.getLastName());
             ps.setString(3, entity.getNationalCode());
-
             ps.setDate(4, Date.valueOf(entity.getBirthDate()));
             ps.setString(5, entity.getGender().getString());
             ps.setString(6, entity.getStatus().getString());
             ps.setInt(7, entity.getSentenceId());
-            ps.setInt(8, entity.getCellID());
-            ps.setInt(9, id);
+            ps.setInt(8, id);
             ps.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -126,10 +131,10 @@ public class PrisonerDaoImpl implements PrisonerDao {
     public Transfer transfer(int prisonerId, int fromCell, int toCell, int guardId, LocalDate transferDate, String description) {
         String sql = "INSERT into  transfer(prisoner_id, from_cell, to_cell, guard_id, transfer_date, description) values (?,?,?,?,?,?)";
         String innerSql = "UPDATE Prisoner SET cell_id = ? where id = ?";
-        try (Connection conn = DataBaseManager.getInstance().getConnection()) {
-            conn.setAutoCommit(false);
-            CellDao cellDao = new CellDaoImpl();
-            if (cellDao.getRemaining(toCell) > 0) {
+        CellDao cellDao = new CellDaoImpl();
+        if (cellDao.getRemaining(toCell) > 0) {
+            try (Connection conn = DataBaseManager.getInstance().getConnection()) {
+                conn.setAutoCommit(false);
                 try (PreparedStatement ps = conn.prepareStatement(sql);
                      PreparedStatement innerPS = conn.prepareStatement(innerSql)) {
                     innerPS.setInt(1, toCell);
@@ -147,14 +152,31 @@ public class PrisonerDaoImpl implements PrisonerDao {
                     conn.rollback();
                     throw new RuntimeException(e.getMessage());
                 }
-            } else {
-                throw new RuntimeException("Cell Is full");
+                conn.commit();
+                return new Transfer(prisonerId, fromCell, toCell, guardId, transferDate, description);
+            } catch (SQLException | RuntimeException e) {
+                throw new RuntimeException(e.getMessage());
             }
-            conn.commit();
-            return new Transfer(prisonerId, fromCell, toCell, guardId, transferDate, description);
-        } catch (SQLException | RuntimeException e) {
-            throw new RuntimeException(e.getMessage());
+        }else {
+            throw new RuntimeException("Cell Is full");
         }
+    }
+
+    @Override
+    public List<Prisoner> getByCrime(int id) {
+        String sql = "SELECT p.* FROM Sentences s INNER JOIN Prisoner p ON s.id = p.sentence_id where s.crime_id = ?";
+        List<Prisoner> prisoners = new ArrayList<>();
+        try(Connection conn = DataBaseManager.getInstance().getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                prisoners.add(map(rs));
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return prisoners;
     }
 
     public Prisoner map(ResultSet rs) throws SQLException{
@@ -164,8 +186,8 @@ public class PrisonerDaoImpl implements PrisonerDao {
                 rs.getString("last_name"),
                 rs.getString("national_code"),
                 rs.getDate("birth_date").toLocalDate(),
-                Gender.valueOf(rs.getString("gender")),
-                PrisonerStatus.valueOf(rs.getString("status")),
+                Gender.valueOf(rs.getString("gender").toUpperCase()),
+                PrisonerStatus.valueOf(rs.getString("status").toUpperCase()),
                 rs.getInt("sentence_id"),
                 rs.getInt("cell_id")
         );

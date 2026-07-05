@@ -1,11 +1,15 @@
 package com.Arshan.models.dao.implement;
 
+import com.Arshan.models.dao.PrisonerDao;
 import com.Arshan.models.dao.VisitDao;
 import com.Arshan.models.database.DataBaseManager;
+import com.Arshan.models.entity.Prisoner;
 import com.Arshan.models.entity.Visit;
 import com.Arshan.models.entity.enums.VisitStatus;
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,12 +58,30 @@ public class VisitDaoImpl implements VisitDao {
                         rs.getDate("visit_date").toLocalDate(),
                         rs.getTime("visit_time").toLocalTime(),
                         VisitStatus.valueOf(rs.getString("status"))
-
                 ));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage());
         }
         return Visits;
+    }
+
+    @Override
+    public List<Prisoner> haveVisit() {
+        List<Prisoner> haveVisit = new ArrayList<>();
+        PrisonerDao prisonerDao = new PrisonerDaoImpl();
+        LocalTime now = LocalTime.now();
+        LocalDate today = LocalDate.now();
+        String sql = "SELECT p.* ,v.visit_time FROM Prisoner p JOIN Visit v ON p.id=v.prisoner_id where v.visit_date = CURRENT_DATE AND v.visit_time > current_time";
+        try (Connection conn = DataBaseManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                haveVisit.add(prisonerDao.map(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        return haveVisit;
     }
 }

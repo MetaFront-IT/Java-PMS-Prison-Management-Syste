@@ -58,4 +58,15 @@ public class Visitor {
     public void setRelationToPrisoner(String relationToPrisoner) {
         this.relationToPrisoner = relationToPrisoner;
     }
+
+    @Override
+    public String toString() {
+        return "Visitor{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", nationalCode='" + nationalCode + '\'' +
+                ", relationToPrisoner='" + relationToPrisoner + '\'' +
+                '}';
+    }
 }

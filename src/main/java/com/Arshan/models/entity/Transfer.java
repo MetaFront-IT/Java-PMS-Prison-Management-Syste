@@ -80,4 +80,17 @@ public class Transfer {
     public void setDescription(String description) {
         Description = description;
     }
+
+    @Override
+    public String toString() {
+        return "Transfer{" +
+                "id=" + id +
+                ", prisonerId=" + prisonerId +
+                ", fromCell=" + fromCell +
+                ", toCell=" + toCell +
+                ", guardId=" + guardId +
+                ", transferDate=" + transferDate +
+                ", Description='" + Description + '\'' +
+                '}';
+    }
 }

@@ -34,7 +34,7 @@ public class CellDaoImpl implements CellDao {
             ps.setInt(1, entity.getCapacity());
             ps.setInt(2, entity.getBlockId());
             ps.setInt(3, integer);
-            ps.execute();
+            ps.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -60,7 +60,7 @@ public class CellDaoImpl implements CellDao {
 
     @Override
     public HashSet<Prisoner> getPrisoners(Integer cellId) {
-        String sql = "SELECT * FROM prisoners where cell_id = ?";
+        String sql = "SELECT * FROM prisoner where cell_id = ?";
         HashSet<Prisoner> currentPrisoners = new HashSet<>();
         try (Connection conn = DataBaseManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -78,7 +78,7 @@ public class CellDaoImpl implements CellDao {
 
     @Override
     public List<Cell> getEmptyCell() {
-        String sql = "SELECT C.* FROM Cell c LEFT JOIN Prisoner p ON  c.id = p.cell_id GROUP BY c.id, p.id HAVING COUNT(p.id) < c.capacity";
+        String sql = "SELECT C.* FROM Cell c LEFT JOIN Prisoner p ON  c.id = p.cell_id GROUP BY c.id HAVING COUNT(p.id) < c.capacity";
         List<Cell> emptyCells = new ArrayList<>();
         try (Connection conn = DataBaseManager.getInstance().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

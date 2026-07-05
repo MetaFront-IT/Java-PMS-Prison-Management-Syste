@@ -39,10 +39,7 @@ public class BlockDaoImpl implements BlockDao {
 
     @Override
     public List<Cell> getCells(int id) {
-        String sql = "SELECT c.*, b.*, count(p.id) as PrisonersCount\n" +
-                "FROM cell c INNER JOIN Block b ON c.block_id = b.id LEFT JOIN Prisoner p ON c.id = p.cell_id where b.id = ?\n" +
-                "GROUP BY c.id, c.cell_number, b.id, b.name\n" +
-                "order by PrisonersCount DESC;";
+        String sql = "SELECT c.*, b.*, count(p.id) as PrisonersCount FROM cell c INNER JOIN Block b ON c.block_id = b.id LEFT JOIN Prisoner p ON c.id = p.cell_id where b.id = ? GROUP BY c.id, c.cell_number, b.id, b.name order by PrisonersCount DESC;\n";
         List<Cell> cells = new ArrayList<>();
         try(Connection conn = DataBaseManager.getInstance().getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -68,6 +65,52 @@ public class BlockDaoImpl implements BlockDao {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return rs.getInt("count");
+            } else {
+                throw new NotFound();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public int getAverageCount() {
+        String sql = "SELECT avg(prisonerCountPerBlock) FROM (SELECT b.id, COUNT(p.id) AS prisonerCountPerBlock FROM Block b LEFT JOIN Cell c ON c.block_id = b.id  LEFT JOIN prisoner p ON p.cell_id = c.id GROUP BY b.id) AS Block;";
+        try (Connection conn = DataBaseManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("avg");
+            } else {
+                throw new NotFound();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public int getMaxCount() {
+        String sql = "SELECT max(prisonerCountPerBlock) FROM (SELECT b.id, COUNT(p.id) AS prisonerCountPerBlock FROM Block b LEFT JOIN Cell c ON c.block_id = b.id LEFT JOIN prisoner p ON p.cell_id = c.id GROUP BY b.id) AS Block";
+        try (Connection conn = DataBaseManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("max");
+            } else {
+                throw new NotFound();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public int getMinCount() {
+        String sql = "SELECT min(prisonerCountPerBlock) FROM (SELECT b.id, COUNT(p.id) AS prisonerCountPerBlock FROM Block b LEFT JOIN Cell c ON c.block_id = b.id LEFT JOIN prisoner p ON p.cell_id = c.id GROUP BY b.id) AS Block";
+        try (Connection conn = DataBaseManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("min");
             } else {
                 throw new NotFound();
             }

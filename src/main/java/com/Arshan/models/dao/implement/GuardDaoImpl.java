@@ -126,13 +126,30 @@ public class GuardDaoImpl implements GuardDao {
     }
 
     @Override
+    public List<Guard> getByBlock(int id) {
+        List<Guard> thisBlock = new ArrayList<>();
+        String sql = "SELECT * FROM guard where block_id = ?";
+        try (Connection conn = DataBaseManager.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1,id);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                thisBlock.add(map(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        return thisBlock;
+    }
+
+    @Override
     public Guard map(ResultSet rs) throws SQLException {
         return new Guard(
                 rs.getInt("id"),
                 rs.getString("first_name"),
                 rs.getString("last_name"),
                 rs.getString("national_code"),
-                Shift.valueOf(rs.getString("shift")),
+                Shift.valueOf(rs.getString("shift").toUpperCase()),
                 rs.getInt("block_id")
         );
     }

@@ -31,4 +31,12 @@ public class Crime {
     public void setTitle(String title) {
         this.title = title;
     }
+
+    @Override
+    public String toString() {
+        return "Crime{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                '}';
+    }
 }

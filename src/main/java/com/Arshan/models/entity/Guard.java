@@ -71,5 +71,15 @@ public class Guard {
         this.blockId = blockId;
     }
 
-
+    @Override
+    public String toString() {
+        return "Guard{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", nationalCode='" + nationalCode + '\'' +
+                ", shift=" + shift +
+                ", blockId=" + blockId +
+                '}';
+    }
 }
